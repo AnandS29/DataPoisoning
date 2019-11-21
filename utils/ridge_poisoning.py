@@ -1,5 +1,7 @@
 import numpy as np
 import cvxpy as cp
+from interval_bounds import *
+
 
 l = lambda X: np.linalg.norm(X@np.linalg.pinv(X)@y-y)**2
 
@@ -50,7 +52,8 @@ def solve_poisoned_relaxed(X_nominal, y, lamb=10, rho=10, mu=10):
     prob.solve()
     return -1*prob.value, X.value, U.value
 
-def solve_poisoned_relaxed_interval_bounded(X_nominal, y, U_lower, U_upper, lamb=10, rho=10, mu=10):
+def solve_poisoned_relaxed_interval_bounded(X_nominal, y, lamb=10, rho=10, mu=10):
+    U_lower, U_upper = find_interval_bounds_infty_uncertainty(X_nominal, rho)
     n, m = X_nominal.shape
     X = cp.Variable((n,m))
     M = cp.Variable((m+1,m+1), PSD=True)
