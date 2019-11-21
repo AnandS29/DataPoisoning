@@ -25,7 +25,7 @@ def solve_robust(X,y, rho, lambda_):
     prob.solve()
     return prob.value, w_rob.value
 
-def solve_poisoned(X_nominal, y, lamb=10, rho=10, mu=10):
+def solve_poisoned_relaxed(X_nominal, y, lamb=10, rho=10, mu=10):
     X = cp.Variable((n,m))
     M = cp.Variable((m+1,m+1), PSD=True)
     N = cp.Variable((m+n,m+n), PSD=True)
@@ -42,6 +42,30 @@ def solve_poisoned(X_nominal, y, lamb=10, rho=10, mu=10):
         N[m:,0:m] == X,
         N[0:m,m:] == X.T,
         
+    ]
+    for i in range(n):
+        constraints.append(cp.norm(X[i]-X_nominal[i],2) <= rho)
+    prob = cp.Problem(poisoned_obj, constraints)
+    prob.solve()
+    return -1*prob.value, X.value, U.value
+
+def solve_poisoned_bounded(X_nominal, y, lamb=10, rho=10, mu=0, upper_bound=10):
+    X = cp.Variable((n,m))
+    M = cp.Variable((m+1,m+1), PSD=True)
+    N = cp.Variable((m+n,m+n), PSD=True)
+    t = cp.Variable(1)
+    U = cp.Variable((m,m), PSD=True)
+    poisoned_obj = cp.Minimize(t - cp.square(cp.norm(y)) + mu*cp.trace(U))
+    constraints = [
+        M[0:m,0:m] == U - lamb*np.eye(m),
+        M[m,m] == t,
+        M[m:m+1,0:m] == y.T@X,
+        M[0:m,m:m+1] == X.T@y,
+        N[0:m,0:m] == U,
+        N[m:,m:] == np.eye(n),
+        N[m:,0:m] == X,
+        N[0:m,m:] == X.T,
+        t - cp.square(cp.norm(y)) + mu*cp.trace(U) <= upper_bound
     ]
     for i in range(n):
         constraints.append(cp.norm(X[i]-X_nominal[i],2) <= rho)
