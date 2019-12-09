@@ -23,7 +23,7 @@ def find_interval_bound_for_uij(x_i, x_j, rho):
     return sum(max_list), sum(min_list)
 
 def solve_one_dim_opt_problem(x_ik, x_jk, rho):
-    objective_fxn = lambda a,b: x_ik*a + x_jk*b + a*b
+    objective_fxn = lambda a,b: x_ik*x_jk + x_ik*a + x_jk*b + a*b
     d_ik_options, d_jk_options = [-rho, rho], [-rho, rho]
     values = []
     for a in d_ik_options:
