@@ -20,7 +20,6 @@ def solve_spectral_norm_constrained(X_ogi, y_ogi, eps):
 
     d_vec = U.T@y_ogi
     success, r_star = solve_line_search_problem(d_vec, Sigma, eps)
-    r_star = r_star.root
     if success == 0:
         print("Can make zero matrix")
         return np.zeros(X_ogi.shape), r_star
@@ -28,9 +27,10 @@ def solve_spectral_norm_constrained(X_ogi, y_ogi, eps):
         print("Impossible to do any poisoning")
         return X_ogi, r_star
     else :
+        r_star = r_star.root
         lambda_star = find_lambda_from_r(r_star, Sigma, d_vec)
         mu_star = lambda_star * r_star
-        c_star = lambda_star*d_vec 
+        c_star = lambda_star*d_vec
         Sigma = np.diag(Sigma)
         c_star += mu_star*Sigma@Sigma@d_vec
         u_star = U@c_star
@@ -75,7 +75,7 @@ def find_projection_map(v):
 def find_lambda_from_r(r, Sigma, d):
     summation = 0
     for i in range(len(d)):
-        num = d[i]**2 
+        num = d[i]**2
         deno = (1 + r*Sigma[i]**2)**2
         summation += num/deno
     return np.sqrt(summation)
