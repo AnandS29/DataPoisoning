@@ -29,6 +29,7 @@ def solve_robust(X,y, rho, lambda_):
     return prob.value, w_rob.value
 
 def solve_poisoned_relaxed(X_nominal, y, lamb=10, rho=10, mu=10):
+    n, m = X_nominal.shape[0], X_nominal.shape[1]
     X = cp.Variable((n,m))
     M = cp.Variable((m+1,m+1), PSD=True)
     N = cp.Variable((m+n,m+n), PSD=True)
